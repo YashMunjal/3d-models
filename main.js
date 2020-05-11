@@ -1,12 +1,25 @@
 let scene, camera, renderer, controls, model, hemiLight, spotLight;
 function init() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xdddddd);
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 5000);
-    camera.position.set(0, 25, 25);
-    //camera.zoom=0.1;
+
+    scene.background = new THREE.CubeTextureLoader()
+	.setPath( 'model/' )
+	.load( [
+        'posx.jpg',
+        'negx.jpg',
+        'posy.jpg',
+        'negy.jpg',
+        'posz.jpg',
+        'negz.jpg',
+        
+		
+	] );
+
+    camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 5000);
+    camera.position.set(200, 155, 155);
+    camera.zoom = 0.5;
     //scene.add(new THREE.AxesHelper(500));
-    renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
@@ -19,8 +32,9 @@ function init() {
 
     //set up lights : spot lights
 
-    spotLight = new THREE.SpotLight(0xffa95c, 4);
+    spotLight = new THREE.SpotLight(0xffa95c, 18);
     //spotLight.castShadow = true;
+    spotLight.position.set(-10, -10, -10);
     scene.add(spotLight);
 
     //tone mapping
@@ -30,22 +44,13 @@ function init() {
     //model upload
     renderer.shadowMap.enabled = true;
 
+    //add button listeners
 
-    new THREE.GLTFLoader().load('model/scene.gltf', result => {
+    new THREE.GLTFLoader().load(`model/model2/scene.gltf`, result => {
         model = result.scene.children[0];
         model.scale.setScalar(0.8);
-        //sahdow fix
-        model.traverse(n => {
-            if (n.isMesh) {
-                n.castShadow = true;
-                n.receiveShadow = true;
-                n.material.transparent=false;
-                if (n.material.map) n.material.map.anisotropy = 16;
-            }
-        });
-        spotLight.shadow.bias = -0.0001;
-        spotLight.shadow.mapSize.width = 1024 * 4;
-        spotLight.shadow.mapSize.height = 1024 * 4;
+        model.position.set(0, 0, -35);
+
         scene.add(model);
         animate();
     });
